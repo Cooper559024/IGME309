@@ -1,5 +1,5 @@
 #include "Main.h"
-template <typename T> 
+template <typename T>
 void Print(std::deque<T> a_queue)
 {
 	std::cout << "Begining of queue......." << std::endl;
@@ -32,7 +32,7 @@ int main(void)
 	std::cout << "	just pushed +++++" << std::endl;
 	myQueue.push_back(4);
 	std::cout << "	just pushed +++++" << std::endl;
-	myQueue.push_back(5);
+	myQueue.push_back(0);
 	std::cout << "	just pushed +++++" << std::endl;
 	//Print queue
 	Print<int>(myQueue);
@@ -81,7 +81,5 @@ int main(void)
 
 	std::cout << "Press Enter to finish." << std::endl;
 
-
-	
 	getchar();
 }
