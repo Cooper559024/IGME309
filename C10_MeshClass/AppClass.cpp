@@ -8,6 +8,13 @@ void Application::InitVariables(void)
 	vector3 v3Upward = AXIS_Y;
 	m_pCameraMngr->SetPositionTargetAndUpward(v3Position, v3Target, v3Upward);
 
+	m_pMyShape = new MyMesh();
+
+	m_pMyShape->AddQuad(vector3(0.0f, 0.0f, 0.0f), vector3(1.0f, 0.0f, 0.0f), vector3(0.0f, 1.0f, 0.0f), vector3(1.0f, 1.0f, 0.0f));
+	m_pMyShape->CompleteMesh();
+
+	m_pMyShape->CompileOpenGL3X();
+
 	m_pMesh1 = new MyMesh();
 	m_pMesh1->GenerateCube(1.0f, C_PURPLE);
 
@@ -40,8 +47,9 @@ void Application::Display(void)
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
 
-	m_pMesh1->Render(m4Projection, m4View, m4Model);
-	m_pMesh2->Render(m4Projection, m4View, glm::translate(IDENTITY_M4, vector3(2.0f)));
+	//m_pMesh1->Render(m4Projection, m4View, m4Model);
+	//m_pMesh2->Render(m4Projection, m4View, glm::translate(IDENTITY_M4, vector3(2.0f)));
+	m_pMyShape->Render(m4Projection, m4View, m4Model);
 
 	// draw a skybox
 	m_pModelMngr->AddSkyboxToRenderList();
@@ -54,13 +62,17 @@ void Application::Display(void)
 
 	//draw gui
 	DrawGUI();
-	
+
 	//end the current frame (internally swaps the front and back buffers)
 	m_pWindow->display();
 }
 void Application::Release(void)
 {
-
+	if (m_pMyShape)
+	{
+		delete m_pMyShape;
+		m_pMyShape = nullptr;
+	}
 	SafeDelete(m_pMesh1);
 	SafeDelete(m_pMesh2);
 
