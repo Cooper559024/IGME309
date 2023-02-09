@@ -16,9 +16,32 @@ void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 		Calculate a_nSubdivisions number of points around a center point in a radial manner
 		then call the AddTri function to generate a_nSubdivision number of faces
 	*/
-	AddTri(	vector3(0.0f, 0.0f, 0.0f),
-			vector3(1.0f, 0.0f, 0.0f),
-			vector3(0.77f, 0.77f, 0.0f));
+
+	// Vector to temporarily hold all of the vertices
+	std::vector<vector3> vertices;
+
+	// The angle to place the point at, will change through the time
+	float angle = 0;
+
+	// The change to be applied to the angle each time in radians
+	float change = (float)(2.0 * PI / (float)(a_nSubdivisions));
+
+	// Adds each point to the vertices vector using the given angle
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// Create the point using trig (cos = x value sin = y value)
+		vector3 point = vector3(cos(angle) * a_fRadius, sin(angle) * a_fRadius, 0.0f);
+		// Add the point
+		vertices.push_back(point);
+		// Change the angle
+		angle += change;
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// create the triangles using the points from the vertex using modulus to ensure we don't get an index out of bounds error
+		AddTri(vector3(0.0f, 0.0f, 0.0f), vertices[i], vertices[(i + 1) % a_nSubdivisions]);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -130,7 +153,7 @@ void MyMesh::CompileOpenGL3X(void)
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);//Bind the VBO
 	glBufferData(GL_ARRAY_BUFFER, m_uVertexCount * 2 * sizeof(vector3), &m_lVertex[0], GL_STATIC_DRAW);//Generate space for the VBO
 
-																									   // Position attribute
+	// Position attribute
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(vector3), (GLvoid*)0);
 
@@ -179,7 +202,7 @@ void MyMesh::AddTri(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTo
 	//C
 	//| \
 		//A--B
-//This will make the triangle A->B->C 
+//This will make the triangle A->B->C
 	AddVertexPosition(a_vBottomLeft);
 	AddVertexPosition(a_vBottomRight);
 	AddVertexPosition(a_vTopLeft);
@@ -221,7 +244,7 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 	vector3 point6(fValue, fValue, -fValue); //6
 	vector3 point7(-fValue, fValue, -fValue); //7
 
-											  //F
+	//F
 	AddQuad(point0, point1, point3, point2);
 
 	//B
@@ -262,7 +285,7 @@ void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
 	vector3 point6(v3Value.x, v3Value.y, -v3Value.z); //6
 	vector3 point7(-v3Value.x, v3Value.y, -v3Value.z); //7
 
-													   //F
+	//F
 	AddQuad(point0, point1, point3, point2);
 
 	//B
