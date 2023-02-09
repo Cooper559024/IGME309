@@ -10,7 +10,9 @@ void Application::InitVariables(void)
 
 	m_pMyShape = new MyMesh();
 
-	m_pMyShape->AddQuad(vector3(0.0f, 0.0f, 0.0f), vector3(1.0f, 0.0f, 0.0f), vector3(0.0f, 1.0f, 0.0f), vector3(1.0f, 1.0f, 0.0f));
+	m_pMyShape->AddVertexPosition(vector3(0.0f, 0.0f, 0.0f));
+	m_pMyShape->AddVertexPosition(vector3(0.0f, 1.0f, 0.0f));
+	m_pMyShape->AddVertexPosition(vector3(1.0f, 0.0f, 0.0f));
 	m_pMyShape->CompleteMesh();
 
 	m_pMyShape->CompileOpenGL3X();

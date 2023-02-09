@@ -143,7 +143,6 @@ void MyMesh::CompileOpenGL3X(void)
 
 void MyMesh::Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel)
 {
-
 	if (!m_bBinded)
 		return;
 
@@ -182,8 +181,8 @@ void MyMesh::AddTri(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTo
 {
 	//C
 	//| \
-		//A--B
-//This will make the triangle A->B->C 
+	//A--B
+//This will make the triangle A->B->C
 	AddVertexPosition(a_vBottomLeft);
 	AddVertexPosition(a_vBottomRight);
 	AddVertexPosition(a_vTopLeft);
@@ -267,7 +266,7 @@ void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
 	vector3 point6(v3Value.x, v3Value.y, -v3Value.z); //6
 	vector3 point7(-v3Value.x, v3Value.y, -v3Value.z); //7
 
-													   //F
+	//F
 	AddQuad(point0, point1, point3, point2);
 
 	//B
