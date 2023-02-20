@@ -61,7 +61,24 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> vertices;
+	GLfloat angle = 0;
+	GLfloat change = static_cast<GLfloat>(PI * 2.0 / static_cast<GLfloat>(a_nSubdivisions));
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		vector3 point = vector3(cos(angle) * a_fRadius, sin(angle) * a_fRadius, -a_fHeight / 2);
+		vertices.push_back(point);
+		angle += change;
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddTri(vector3(0.0f, 0.0f, a_fHeight / 2), vertices[i], vertices[(i + 1) % a_nSubdivisions]);
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddTri(vector3(0.0f, 0.0f, -a_fHeight / 2), vertices[(i + 1) % a_nSubdivisions], vertices[i]);
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -85,7 +102,31 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> circleVertex;
+	std::vector<vector3> baseVertex;
+	std::vector<vector3> topVertex;
+	GLfloat theta = 0;
+	GLfloat delta = static_cast<GLfloat>(PI * 2.0 / static_cast<GLfloat>(a_nSubdivisions));
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// create generic circle vertices
+		vector3 temp = vector3(cos(theta) * a_fRadius, sin(theta) * a_fRadius, 0.0f);
+		circleVertex.push_back(temp);
+		theta += delta;
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// adjust the circle vertices for the heighe
+		topVertex.push_back(circleVertex[i] + vector3(0.0f, 0.0f, -a_fHeight / 2));
+		baseVertex.push_back(circleVertex[i] + vector3(0.0f, 0.0f, a_fHeight / 2));
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// generate the cylinder
+		AddTri(vector3(0.0f, 0.0f, a_fHeight / 2), baseVertex[i], baseVertex[(i + 1) % a_nSubdivisions]);
+		AddTri(vector3(0.0f, 0.0f, -a_fHeight / 2), topVertex[(i + 1) % a_nSubdivisions], topVertex[i]);
+		AddQuad(baseVertex[(i + 1) % a_nSubdivisions], baseVertex[i], topVertex[(i + 1) % a_nSubdivisions], topVertex[i]);
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -115,7 +156,44 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	std::vector<vector3> innerVertices;
+	std::vector<vector3> outerVertices;
+	std::vector<vector3> topInner;
+	std::vector<vector3> topOuter;
+	std::vector<vector3> bottomInner;
+	std::vector<vector3> bottomOuter;
+
+	GLfloat theta = 0;
+	GLfloat delta = static_cast<GLfloat>(PI * 2.0 / static_cast<GLfloat>(a_nSubdivisions));
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// generate basic vertex positions and store them
+		vector3 tempInner = vector3(cos(theta) * a_fInnerRadius, sin(theta) * a_fInnerRadius, 0.0f);
+		innerVertices.push_back(tempInner);
+
+		vector3 tempOuter = vector3(cos(theta) * a_fOuterRadius, sin(theta) * a_fOuterRadius, 0.0f);
+		outerVertices.push_back(tempOuter);
+
+		theta += delta;
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// create new useable positions that take the height into account
+		topInner.push_back(innerVertices[i] + vector3(0.0f, 0.0f, -a_fHeight / 2));
+		topOuter.push_back(outerVertices[i] + vector3(0.0f, 0.0f, -a_fHeight / 2));
+
+		bottomInner.push_back(innerVertices[i] + vector3(0.0f, 0.0f, a_fHeight / 2));
+		bottomOuter.push_back(outerVertices[i] + vector3(0.0f, 0.0f, a_fHeight / 2));
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// generate the tube
+		AddQuad(bottomOuter[(i + 1) % a_nSubdivisions], bottomOuter[i], topOuter[(i + 1) % a_nSubdivisions], topOuter[i]);
+		AddQuad(bottomInner[i], bottomInner[(i + 1) % a_nSubdivisions], topInner[i], topInner[(i + 1) % a_nSubdivisions]);
+		AddQuad(bottomInner[(i + 1) % a_nSubdivisions], bottomInner[i], bottomOuter[(i + 1) % a_nSubdivisions], bottomOuter[i]);
+		AddQuad(topInner[i], topInner[(i + 1) % a_nSubdivisions], topOuter[i], topOuter[(i + 1) % a_nSubdivisions]);
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -146,8 +224,44 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	// Replace this with your code Wolfram alpha contains math for answers.
+	std::vector<vector3> circleVertices;
+	std::vector<std::vector<vector3>>  transVertices;
+	GLfloat theta = 0;
+	GLfloat delta = static_cast<GLfloat>(2.0 * PI / static_cast<GLfloat>(a_nSubdivisionsA));
+
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+		vector3 temp = vector3(cos(theta) * a_fInnerRadius / 1.5, sin(theta) * a_fInnerRadius / 1.5, 0.0f);
+		theta += delta;
+		circleVertices.push_back(temp);
+	}
+
+	float fTheta = (2 * PI / static_cast<float>(a_nSubdivisionsB));
+
+	for (uint uSubd = 0; uSubd < a_nSubdivisionsB; uSubd++)
+	{
+		std::vector<vector3> newVertex = circleVertices;
+		matrix4 m4Transform;
+		m4Transform = glm::rotate(IDENTITY_M4, fTheta * static_cast<float>(uSubd), AXIS_Y);
+		m4Transform = glm::translate(m4Transform, vector3(5, 0, 0));
+
+		for (int i = 0; i < a_nSubdivisionsB; i++)
+		{
+			newVertex[i] = m4Transform * vector4(circleVertices[i], a_fOuterRadius / 3);
+		}
+		transVertices.push_back(newVertex);
+	}
+
+	for (int i = 0; i < transVertices.size(); i++)
+	{
+		std::vector<vector3> currentVertices = transVertices[i];
+		std::vector<vector3> nextVertices = transVertices[(i + 1) % transVertices.size()];
+		for (int j = 0; j < a_nSubdivisionsB; j++)
+		{
+			AddQuad(currentVertices[(j + 1) % a_nSubdivisionsB], currentVertices[j], nextVertices[(j + 1) % a_nSubdivisionsB], nextVertices[j]);
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -172,7 +286,49 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	// Transformation for a 180 degree rotation on the z axis
+	matrix4 m4Transform;
+	m4Transform = glm::rotate(IDENTITY_M4, static_cast<GLfloat>(PI), AXIS_Z);
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		GLfloat theta1 = static_cast<GLfloat>(i) / static_cast<GLfloat>(a_nSubdivisions) * PI;
+		GLfloat theta2 = static_cast<GLfloat>(i + 1) / static_cast<GLfloat>(a_nSubdivisions) * PI;
+		for (int j = 0; j < a_nSubdivisions; j++)
+		{
+			GLfloat phi1 = static_cast<GLfloat>(j) / static_cast<GLfloat>(a_nSubdivisions) * PI;
+			GLfloat phi2 = static_cast<GLfloat>(j + 1) / static_cast<GLfloat>(a_nSubdivisions) * PI;
+
+			// vertices for each "panel" of the sphere
+			vector3 v1 = a_fRadius * vector3(sin(theta1) * cos(phi1), sin(theta1) * sin(phi1), cos(theta1));
+			vector3 v2 = a_fRadius * vector3(sin(theta1) * cos(phi2), sin(theta1) * sin(phi2), cos(theta1));
+			vector3 v3 = a_fRadius * vector3(sin(theta2) * cos(phi1), sin(theta2) * sin(phi1), cos(theta2));
+			vector3 v4 = a_fRadius * vector3(sin(theta2) * cos(phi2), sin(theta2) * sin(phi2), cos(theta2));
+
+			// vertices rotated 180 degrees
+			vector3 v1Opposit = vector4(v1, 1.0f) * m4Transform;
+			vector3 v2Opposit = vector4(v2, 1.0f) * m4Transform;
+			vector3 v3Opposit = vector4(v3, 1.0f) * m4Transform;
+			vector3 v4Opposit = vector4(v4, 1.0f) * m4Transform;
+
+			if (i == 0)
+			{
+				AddTri(v3, v4, v1);
+				AddTri(v3Opposit, v4Opposit, v1Opposit);
+			}
+			else if (i + 1 == a_nSubdivisions)
+			{
+				AddTri(v2, v1, v4);
+				AddTri(v2Opposit, v1Opposit, v4Opposit);
+			}
+			else
+			{
+				AddTri(v3, v2, v1);
+				AddTri(v3Opposit, v2Opposit, v1Opposit);
+				AddTri(v3, v4, v2);
+				AddTri(v3Opposit, v4Opposit, v2Opposit);
+			}
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -184,7 +340,7 @@ void MyMesh::AddTri(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTo
 	//C
 	//| \
 	//A--B
-	//This will make the triangle A->B->C 
+	//This will make the triangle A->B->C
 	AddVertexPosition(a_vBottomLeft);
 	AddVertexPosition(a_vBottomRight);
 	AddVertexPosition(a_vTopLeft);
@@ -325,7 +481,7 @@ void MyMesh::Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel)
 {
 	// Use the buffer and shader
 	GLuint nShader = m_pShaderMngr->GetShaderID("Basic");
-	glUseProgram(nShader); 
+	glUseProgram(nShader);
 
 	//Bind the VAO of this object
 	glBindVertexArray(m_VAO);
@@ -337,11 +493,11 @@ void MyMesh::Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel)
 	//Final Projection of the Camera
 	matrix4 m4MVP = a_mProjection * a_mView * a_mModel;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(m4MVP));
-	
+
 	//Solid
 	glUniform3f(wire, -1.0f, -1.0f, -1.0f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawArrays(GL_TRIANGLES, 0, m_uVertexCount);  
+	glDrawArrays(GL_TRIANGLES, 0, m_uVertexCount);
 
 	//Wire
 	glUniform3f(wire, 1.0f, 0.0f, 1.0f);
