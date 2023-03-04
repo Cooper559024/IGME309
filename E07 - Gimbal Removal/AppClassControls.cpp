@@ -109,12 +109,14 @@ void Application::ProcessKeyboard(void)
 		if (fMultiplier)
 		{
 			m_v3Rotation.x -= 1.0f;
+			// setup quaternion and change orientation quaternion based on this new quat
 			quaternion quatX = glm::angleAxis(-.05f, vector3(01.0f, 0.0f, 0.0f));
 			m_qOrientation = m_qOrientation * quatX;
 		}
 		else
 		{
 			m_v3Rotation.x += 1.0f;
+			// setup quaternion and change orientation quaternion based on this new quat
 			quaternion quatX = glm::angleAxis(.05f, vector3(1.0f, 0.0f, 0.0f));
 			m_qOrientation = m_qOrientation * quatX;
 		}
@@ -124,12 +126,14 @@ void Application::ProcessKeyboard(void)
 		if (fMultiplier)
 		{
 			m_v3Rotation.y -= 1.0f;
+			// setup quaternion and change orientation quaternion based on this new quat
 			quaternion quatY = glm::angleAxis(-.05f, vector3(0.0f, 1.0f, 0.0f));
 			m_qOrientation = m_qOrientation * quatY;
 		}
 		else
 		{
 			m_v3Rotation.y += 1.0f;
+			// setup quaternion and change orientation quaternion based on this new quat
 			quaternion quatY = glm::angleAxis(.05f, vector3(0.0f, 1.0f, 0.0f));
 			m_qOrientation = m_qOrientation * quatY;
 		}
@@ -139,12 +143,14 @@ void Application::ProcessKeyboard(void)
 		if (fMultiplier)
 		{
 			m_v3Rotation.z -= 1.0f;
+			// setup quaternion and change orientation quaternion based on this new quat
 			quaternion quatZ = glm::angleAxis(-.05f, vector3(0.0f, 0.0f, 1.0f));
 			m_qOrientation = m_qOrientation * quatZ;
 		}
 		else
 		{
 			m_v3Rotation.z += 1.0f;
+			// setup quaternion and change orientation quaternion based on this new quat
 			quaternion quatZ = glm::angleAxis(.05f, vector3(0.0f, 0.0f, 1.0f));
 			m_qOrientation = m_qOrientation * quatZ;
 		}

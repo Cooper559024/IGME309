@@ -41,6 +41,7 @@ void Application::Display(void)
 	* The following line was replaced by the model manager so we can see a model instead of a cone
 	*/
 
+	// set m_m4Model to a matrix based on the quaternion.
 	m_m4Model = glm::toMat4(m_qOrientation);
 	//m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_m4Model));
 	m_pModelMngr->AddModelToRenderList(m_sSteve, m_m4Model);
