@@ -107,27 +107,52 @@ void Application::ProcessKeyboard(void)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
 	{
 		if (fMultiplier)
+		{
 			m_v3Rotation.x -= 1.0f;
+			quaternion quatX = glm::angleAxis(-.05f, vector3(01.0f, 0.0f, 0.0f));
+			m_qOrientation = m_qOrientation * quatX;
+		}
 		else
+		{
 			m_v3Rotation.x += 1.0f;
+			quaternion quatX = glm::angleAxis(.05f, vector3(1.0f, 0.0f, 0.0f));
+			m_qOrientation = m_qOrientation * quatX;
+		}
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y))
 	{
 		if (fMultiplier)
+		{
 			m_v3Rotation.y -= 1.0f;
+			quaternion quatY = glm::angleAxis(-.05f, vector3(0.0f, 1.0f, 0.0f));
+			m_qOrientation = m_qOrientation * quatY;
+		}
 		else
+		{
 			m_v3Rotation.y += 1.0f;
+			quaternion quatY = glm::angleAxis(.05f, vector3(0.0f, 1.0f, 0.0f));
+			m_qOrientation = m_qOrientation * quatY;
+		}
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
 	{
 		if (fMultiplier)
+		{
 			m_v3Rotation.z -= 1.0f;
+			quaternion quatZ = glm::angleAxis(-.05f, vector3(0.0f, 0.0f, 1.0f));
+			m_qOrientation = m_qOrientation * quatZ;
+		}
 		else
+		{
 			m_v3Rotation.z += 1.0f;
+			quaternion quatZ = glm::angleAxis(.05f, vector3(0.0f, 0.0f, 1.0f));
+			m_qOrientation = m_qOrientation * quatZ;
+		}
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
 	{
 		m_v3Rotation = vector3(0.0f);
+		m_qOrientation = quaternion();
 	}
 }
 //Mouse
@@ -264,7 +289,7 @@ void Application::CameraRotation(float a_fSpeed)
 	UINT	MouseX, MouseY;		// Coordinates for the mouse
 	UINT	CenterX, CenterY;	// Coordinates for the center of the screen.
 
-								//Initialize the position of the pointer to the middle of the screen
+	//Initialize the position of the pointer to the middle of the screen
 	CenterX = m_pSystem->GetWindowX() + m_pSystem->GetWindowWidth() / 2;
 	CenterY = m_pSystem->GetWindowY() + m_pSystem->GetWindowHeight() / 2;
 
