@@ -6,12 +6,168 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//TODO: Calculate the SAT algorithm I STRONGLY suggest you use the
 	//Real Time Collision detection algorithm for OBB here but feel free to
 	//implement your own solution.
-	return BTXs::eSATResults::SAT_NONE;
+
+	// Get the radii of the two objects
+	float radiiA = this->GetRadius();
+	float radiiB = a_pOther->GetRadius();
+
+	// Generate Rotation Matrices
+	glm::mat3x3 rotationA;
+	glm::mat3x3 rotationB;
+
+	// Get a vector of vector3s with the format of (axis, min, max) for this object
+	std::vector<vector3> au;
+	au.push_back(vector3(this->GetModelMatrix()[0][0], this->GetModelMatrix()[0][1], this->GetModelMatrix()[0][2]));
+	au.push_back(vector3(this->GetModelMatrix()[1][0], this->GetModelMatrix()[1][1], this->GetModelMatrix()[1][2]));
+	au.push_back(vector3(this->GetModelMatrix()[2][0], this->GetModelMatrix()[2][1], this->GetModelMatrix()[2][2]));
+
+	// Get a vector of vector3s with the format of (axis, min, max) for the other object
+	std::vector<vector3> bu;
+	bu.push_back(vector3(a_pOther->GetModelMatrix()[0][0], a_pOther->GetModelMatrix()[0][1], a_pOther->GetModelMatrix()[0][2]));
+	bu.push_back(vector3(a_pOther->GetModelMatrix()[1][0], a_pOther->GetModelMatrix()[1][1], a_pOther->GetModelMatrix()[1][2]));
+	bu.push_back(vector3(a_pOther->GetModelMatrix()[2][0], a_pOther->GetModelMatrix()[2][1], a_pOther->GetModelMatrix()[2][2]));
+
+	// Get the centers of both objects
+	vector3 aCenter;
+	vector3 bCenter;
+
+	aCenter = this->GetCenterGlobal();
+	bCenter = a_pOther->GetCenterGlobal();
+
+	// Get the Half Widths of both object
+	vector3 aHalf;
+	vector3 bHalf;
+
+	aHalf = this->GetHalfWidth();
+	bHalf = a_pOther->GetHalfWidth();
+
+	// compute rotation matrix of the other object into this object's coodinate frame
+	for (size_t i = 0; i < 3; i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			rotationA[i][j] = glm::dot(au[i], bu[j]);
+		}
+	}
+
+	// Compute translation vector
+	vector3 translation = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
+
+	// Bring translation vector int this objects coordinate frame.
+	translation = vector3(glm::dot(translation, au[0]), glm::dot(translation, au[1]), glm::dot(translation, au[2]));
+
+	// Compute common subexpressions.
+	for (size_t i = 0; i < 3; i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			rotationB[i][j] = glm::abs(rotationA[i][j]) + FLT_EPSILON;
+		}
+	}
+
+	// Test axes Ax, Ay, Az
+	for (size_t i = 0; i < 3; i++)
+	{
+		radiiA = aHalf[i];
+		radiiB = bHalf[0] * rotationB[i][0] + bHalf[1] * rotationB[i][1] + bHalf[2] * rotationB[i][2];
+		if (glm::abs(translation[i]) > radiiA + radiiB)
+		{
+			return BTXs::eSATResults::SAT_NONE;
+		}
+	}
+
+	// Test axes Bx,By, Bz
+	for (size_t i = 0; i < 3; i++)
+	{
+		radiiA = aHalf[0] * rotationB[0][i] + aHalf[1] * rotationB[1][i] + aHalf[2] * rotationB[2][i];
+		radiiB = bHalf[i];
+		if (glm::abs(translation[0] * rotationA[0][i] + translation[1] * rotationA[1][i] + translation[2] * rotationA[2][i]) > radiiA + radiiB)
+		{
+			return BTXs::eSATResults::SAT_NONE;
+		}
+	}
+
+	// Test axis Ax x Bx
+	radiiA = aHalf[1] * rotationB[2][0] + aHalf[2] * rotationB[1][0];
+	radiiB = bHalf[1] * rotationB[0][2] + bHalf[2] * rotationB[0][1];
+	if (glm::abs(translation[2] * rotationA[1][0] - translation[1] * rotationA[2][0]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Ax x By
+	radiiA = aHalf[1] * rotationB[2][1] + aHalf[2] * rotationB[1][1];
+	radiiB = bHalf[0] * rotationB[0][2] + bHalf[2] * rotationB[0][0];
+	if (glm::abs(translation[2] * rotationA[1][1] - translation[1] * rotationA[2][1]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Ax x Bz
+	radiiA = aHalf[1] * rotationB[2][2] + aHalf[2] * rotationB[1][2];
+	radiiB = bHalf[0] * rotationB[0][1] + bHalf[1] * rotationB[0][0];
+	if (glm::abs(translation[2] * rotationA[1][2] - translation[1] * rotationA[2][2]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Ay x Bx
+	radiiA = aHalf[0] * rotationB[2][0] + aHalf[2] * rotationB[0][0];
+	radiiB = bHalf[1] * rotationB[1][2] + bHalf[2] * rotationB[1][1];
+	if (glm::abs(translation[0] * rotationA[2][0] - translation[2] * rotationA[0][0]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Ay x By
+	radiiA = aHalf[0] * rotationB[2][1] + aHalf[2] * rotationB[0][1];
+	radiiB = bHalf[0] * rotationB[1][2] + bHalf[2] * rotationB[1][0];
+	if (glm::abs(translation[0] * rotationA[2][1] - translation[2] * rotationA[0][1]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Ay x Bz
+	radiiA = aHalf[0] * rotationB[2][2] + aHalf[2] * rotationB[0][2];
+	radiiB = bHalf[0] * rotationB[1][1] + bHalf[1] * rotationB[1][0];
+	if (glm::abs(translation[0] * rotationA[2][2] - translation[2] * rotationA[0][2]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Az x Bx
+	radiiA = aHalf[0] * rotationB[1][0] + aHalf[1] * rotationB[0][0];
+	radiiB = bHalf[1] * rotationB[2][2] + bHalf[2] * rotationB[2][1];
+	if (glm::abs(translation[0] * rotationA[2][2] - translation[2] * rotationA[0][2]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Az x By
+	radiiA = aHalf[0] * rotationB[1][1] + aHalf[1] * rotationB[0][1];
+	radiiB = bHalf[0] * rotationB[2][2] + bHalf[2] * rotationB[2][0];
+	if (glm::abs(translation[1] * rotationA[0][1] - translation[0] * rotationA[1][1]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// Test axis Az x Bz
+	radiiA = aHalf[0] * rotationB[1][2] + aHalf[1] * rotationB[0][2];
+	radiiB = bHalf[0] * rotationB[2][1] + bHalf[1] * rotationB[2][0];
+	if (glm::abs(translation[1] * rotationA[0][2] - translation[0] * rotationA[1][2]) > radiiA + radiiB)
+	{
+		return BTXs::eSATResults::SAT_NONE;
+	}
+
+	// No separation
+	return 1;
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 {
 	//check if spheres are colliding
-	bool bColliding = true;
+	float distanceBetween = glm::distance(GetCenterGlobal(), a_pOther->GetCenterGlobal());
+	float radiusSum = m_fRadius + a_pOther->m_fRadius;
+	bool bColliding = distanceBetween < radiusSum;
 	/*
 	* We use Bounding Spheres or ARBB as a pre-test to avoid expensive calculations (SAT)
 	* we default bColliding to true here to always fall in the need of calculating
@@ -21,7 +177,7 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	{
 		uint nResult = SAT(a_pOther);
 
-		if (bColliding) //The SAT shown they are colliding
+		if (nResult == 1) //The SAT shown they are colliding
 		{
 			this->AddCollisionWith(a_pOther);
 			a_pOther->AddCollisionWith(this);
@@ -109,7 +265,7 @@ void MyRigidBody::SetColorNotColliding(vector3 a_v3Color) { m_v3ColorNotCollidin
 vector3 MyRigidBody::GetCenterLocal(void) { return m_v3Center; }
 vector3 MyRigidBody::GetMinLocal(void) { return m_v3MinL; }
 vector3 MyRigidBody::GetMaxLocal(void) { return m_v3MaxL; }
-vector3 MyRigidBody::GetCenterGlobal(void){	return vector3(m_m4ToWorld * vector4(m_v3Center, 1.0f)); }
+vector3 MyRigidBody::GetCenterGlobal(void) { return vector3(m_m4ToWorld * vector4(m_v3Center, 1.0f)); }
 vector3 MyRigidBody::GetMinGlobal(void) { return m_v3MinG; }
 vector3 MyRigidBody::GetMaxGlobal(void) { return m_v3MaxG; }
 vector3 MyRigidBody::GetHalfWidth(void) { return m_v3HalfWidth; }
