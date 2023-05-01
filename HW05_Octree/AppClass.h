@@ -26,7 +26,7 @@ class Application
 	uint m_uOctantLevels = 0; //Number of levels in the octree
 
 private:
-	String m_sProgrammer = "Aidan McMurray - acm5636@rit.edu";
+	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 	static ImGuiObject gui; //GUI object
 
 	uint m_uRenderCallCount = 0; //count of render calls per frame
