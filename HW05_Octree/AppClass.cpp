@@ -9,7 +9,7 @@ void Application::InitVariables(void)
 	m_pCameraMngr->SetPositionTargetAndUpward(v3Position, v3Target, v3Upward);
 
 #ifdef DEBUG
-	uint uInstances = 900;
+	uint uInstances = 1400;
 #else
 	uint uInstances = 1849;
 #endif
@@ -58,7 +58,7 @@ void Application::Display(void)
 		m_pRoot->Display();
 	else
 		m_pRoot->Display(m_uOctantID);
-	
+
 	matrix4 m4Model = ToMatrix4(m_qArcBall);//model matrix
 
 	// draw a skybox
@@ -72,7 +72,7 @@ void Application::Display(void)
 
 	//draw gui
 	DrawGUI();
-	
+
 	//end the current frame (internally swaps the front and back buffers)
 	m_pWindow->display();
 }
