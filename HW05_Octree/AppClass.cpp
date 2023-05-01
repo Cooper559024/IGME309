@@ -9,7 +9,7 @@ void Application::InitVariables(void)
 	m_pCameraMngr->SetPositionTargetAndUpward(v3Position, v3Target, v3Upward);
 
 #ifdef DEBUG
-	uint uInstances = 1400;
+	uint uInstances = 900;
 #else
 	uint uInstances = 1849;
 #endif

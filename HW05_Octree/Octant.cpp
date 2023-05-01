@@ -189,11 +189,10 @@ void Octant::Subdivide(void)
 		GetChild(i)->m_pRoot = m_pRoot;
 		GetChild(i)->m_pParent = this;
 		GetChild(i)->m_uLevel = m_uLevel + 1;
-	}
-
-	for (int i = 0; i < 8; i++)
-	{
-		GetChild(i)->Subdivide();
+		if (GetChild(i)->ContainsAtLeast(m_uIdealEntityCount))
+		{
+			GetChild(i)->Subdivide();
+		}
 	}
 }
 bool Octant::ContainsAtLeast(uint a_nEntities)
@@ -227,7 +226,7 @@ void Octant::AssignIDtoEntity(void)
 		{
 			if (IsColliding(i))
 			{
-				//m_EntityList.push_back(i);
+				m_EntityList.push_back(i);
 				m_pEntityMngr->AddDimension(i, m_uID);
 			}
 		}
